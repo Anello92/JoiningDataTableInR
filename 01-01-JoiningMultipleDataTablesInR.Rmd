@@ -1,0 +1,136 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Joining multiple data. tables
+A Join describe the action of combining information from two different data tables into a single data table.
+The majority of R's functions for analyzing and visualizing data are designed to work on a single data frame or data table.
+
+The first skill we need to learn is to identify the join KEY COLUMNS.
+Columns that link information across two tables to use as join keys.  
+install.packages(")
+```{r}
+demographics <- data.table(name = c("Trey", "Matthe", "Angela"),
+                            gender = c(NA, "M", "F"),
+                            age = c(54, 43, 39))
+
+shipping <- data.table(name = c("Matthew", "Trey", "Angela"), 
+                            address = c("7 Mill road", "12 High street", "33 Pacific boulevard"))
+```
+
+To identify join keys, we need to learn about the contents of the data tables.
+Inspecting data.tables in your R sessions
+
+- The tables() function will show all data.tables loaded in R session.
+- The str() will show the type of each column in a single data.table
+- Typing the variable name (data.table) will show the values stored in a data table.
+
+=========================================================================================================================
+
+Exploring data.tables
+
+```{r}
+# What data.tables are in my R session?
+tables()
+
+# View the first six rows 
+head(netflix)
+head(imdb)
+
+# Print the structure
+str(netflix)
+str(imdb)
+```
+
+#=================================================== MERGE FUNCTION =====================================================
+
+All four standard joins taht originally come from database query languages, such as SQL. We will learn how to do these
+joins using the merge() function. This function comes from base R but is extended ind the data table package.
+
+- Inner Join: keep observations that have information in BOTH data.tables
+An inner join is the DEFAULT behavior of the merge() function.
+```{r}
+merge(x = demographics, y = shipping,  by.x = "name", by.y="name")
+```
+demographics: name, gender, age
+shipping:     name, address
+output:       name, gender, age, address
+
+- Full Join |Full outer join: keep all observations that are in either data.table
+setting the all argument to be equal to TRUE.
+
+```{r}
+merge(x = demographics, y = shipping, by = "name", all = TRUE)
+```
+
+#=================================================== INNER JOIN  =======================================================
+```{r}
+# Inner join netflix and imdb
+merge(netflix, imdb, by = "title")
+```
+> # Inner join netflix and imdb
+> merge(netflix, imdb, by = "title")
+                            title episodes release_date rating
+1:                 13 Reasons Why       13    31-Mar-17    8.4
+2: A Series of Unfortunate Events        8    13-Jan-17    7.9
+3:                          Gypsy       10    30-Jun-17    7.0
+4:                     Mindhunter       10    13-Oct-17    8.9
+5:                          Ozark       10    21-Jul-17    8.5
+#=================================================== FULL JOIN  =======================================================
+
+```{r}
+# Full join netflix and imdb
+merge(netflix, imdb, by = "title", all = TRUE)
+```
+
+#================================================= LEFT AND RIGHT JOINS ================================================
+
+A left join keeps only the observation that are present in the data table on the left side of the join
+
+- Left join: all.x = TRUE
+```{r}
+merge(x = demographics, y = shipping, by ="name", all.x = TRUE)
+```
+
+- Reight join: all.y = TRUE
+```{r}
+merge(x = demographics, y = shipping, by = "name", all.y = TRUE)
+```
+
+Default values
+  Default values for all, all.x and all.y are FALSE in the mege() function
+  Look up function argument defaults using help("merge")
+  
+#================================================= JOINS  ==========================================================
+
+```{r}
+# Left join imdb to netflix
+merge(x = netflix, y = imdb, by = "title", all.x = TRUE)
+```
+
+```{r}
+# Right join imdb to netflix
+merge(x = netflix, y = imdb, name = "title", all.y = TRUE)
+```
+
+```{r}
+# Identify the key for joining capitals and population
+capitals_population_key <- "city"
+
+# Left join population to capitals
+capital_pop <- merge(capitals, population, by = capitals_population_key, all.x = TRUE)
+capital_pop
+```
+
+```{r}
+# Identify the key for joining capital_pop and area
+capital_pop_area_key <- "state"
+
+# Inner join area to capital pop
+australia_stats <- merge(capital_pop, area, by = capital_pop_area_key)
+
+# Print the final result
+australia_stats
+```
+
