@@ -1,0 +1,115 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Joining Data With Data.Table in R - Incorporating joins into data.table workflow
+
+Chaining data.table expressions:
+data.table expressions can be chained in sequence
+demographics[...][...]
+
+General form of chainin a join:
+
+DataTable1[DataTable2, on][i, j, by]
+           #join to which data.table
+                       #join key columns
+                           #on which rows?
+                              #what to do?
+                                  #grouped by what?
+
+The most flexible way of incorporating joins into our DataTable workflows is by chaining DataTable expressions.
+  "Join DataTable1 to DataTable2 using the column in "on" as the join key.
+    Then in the result, filter by rows in "i", compute on columns "j" grouped by values in columns "by". 
+  
+============================================================================================================
+
+To get the average spent per sale for return customers grouped by gender, we chain two data table expressions.
+
+customers[purchases, on =.(name)][sales > 1, j = .(avg_spent = sum(spent) / sum(sales)), by = .(gender)]
+
+*In the first, we join customers to purchases, then in the second, we filter to customers with more than 1, sale,
+  calculate the average spent per sale in j, grouped by the gender column in by.
+
+    gender    avg_spent
+1:    M          14
+2:    F          20
+
+============================================================================================================
+
+Computation with joins: Efficient for large data.tables
+
+Using the j argument to compute on columns in the same DataTable expression as a join. 
+
+DataTable1[DataTable2, on, j]
+            #join to which data.table?
+                      #using which columns as keys?
+                           #what to do on the join result?
+                        
+This save a lot of time and memory for large DataTables
+                          
+============================================================================================================
+
+Joining and column creation
+
+customers[purchases, on = .(name), return_customer := sales > 1]
+customers
+
+============================================================================================================
+
+Grouping by matches
+
+DataTable1[DataTable2, on, j, by = .EACHI]
+          #joint to which table?
+                       #using which columns as keys?
+                           #what to do on the join result?
+                              #grouped by each match in DataTabel
+                              
+" Join DataTable1 to DataTable 2, then for each row in DataTable2 group calculations in j 
+      by the matching rows in DataTable1
+
+#=========================================== .EACHI========================================================    
+Using by = .EACHI is a useful way of checking our join has the number of matches you expect, and finding rows 
+that may cause problems in downstream analysis. Remember if we want to use by= to group computations in j by
+another column we will need to chain a second data.table[] expression.
+      
+```{r}
+shipping[customers, on = .(name), j = .("#of shipping addresses" = .N), by = .EACHI]
+```
+
+```{r}
+# Inner join capitals to population
+ population[capitals, on = .(city), nomatch =0]
+```
+
+```{r}
+# Join and sum
+population[capitals, on = .(city), nomatch = 0,
+           j = sum(percentage)]
+```
+
+```{r}
+# How many continents is each country listed in?
+continents[life_exp, on = .(country), .N, 
+           by = .EACHI]
+```
+
+```{r}
+# What countries are listed in multiple continents?
+continents[life_exp, on = .(country), .N, 
+           by = .EACHI][N > 1]
+```
+World Life Expectancy
+```{r}
+# Calculate average life expectancy per continent:
+avg_life_expectancy <- continents[life_exp, on = .(country), 
+                                  nomatch = 0][, j = mean(years), 
+                                               by = .(continent)]
+avg_life_expectancy
+```
+
