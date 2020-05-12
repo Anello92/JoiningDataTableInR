@@ -1,0 +1,77 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Joining Data With Data.Table in R - data.table syntax
+
+General form of data.table syntax
+DT[i, j, by]
+DT[on which rows?, what to do?, grouped by what?]
+"Take DT, filter its rows in i, then compute on columns j, grouped by values in columns by. 
+
+General form of data.table joins
+DT[i, on]
+DT[join to which data.table, join key columns]
+"Join DT to i using the column in on as the join key"
+
+The on argument
+Variables inside list() or .() are looked up in the column names of both data.tables
+shipping[demographics, on = list(name)]
+shipping[demographics, on = .(name)]
+
+Left joins
+```{r}
+shipping[demographics, on = .(name)]
+```
+Right joins
+```{r}
+demographics[shipping, on = .(name)]
+```
+Inner joins
+```{r}
+shipping[demographics, on = .(name), nomatch = 0]
+#nomatch tells the data table syntax to ignore rows that cannot be matched between both
+```
+Full joins
+```{r}
+merge(demographics, shipping, by = "name", all = TRUE)
+```
+Anti-joins
+```{r}
+demographics[!shipping, on = .(name)]
+#contains only rows that have no match in the data table on the right
+```
+Character vectors can also be used to specify the join key
+```{r}
+join_key <- c("name")
+shipping[demographics, on = join_key]
+```
+
+===========================================================================================
+
+Right join with the data.table syntax
+```{r}
+# Right join population to capitals using data.table syntax
+capitals[population, on = .(city)]
+```
+Right join using merga
+```{r}
+# Right join using merge
+merge(x = capitals, y = population , by = "city", all.y = TRUE)
+```
+Inner join with data.table syntax
+```{r}
+# Inner join with the data.table syntax
+capitals[population, on = .(city), nomatch = 0]
+```
+Anti-join
+```{r}
+# Anti-join capitals to population
+population[!capitals, on = .(city)]
+```
+```{r}
+# Anti-join capitals to area
+area[!capitals, on = .(state)]
+```
+
