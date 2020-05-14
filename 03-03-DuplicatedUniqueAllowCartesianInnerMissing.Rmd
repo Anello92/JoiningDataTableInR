@@ -1,0 +1,111 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Joining Data with Data.Table in R - Duplicate Matches
+
+The lest set of join problems we will commonly encounter arise from DUPLICATE MATCHES  in the join key values.
+
+Sometimes we will want to join two data tables based on columns with DUPLICATE ENTRIES, leading to multiplicative matches.
+
+Some error is shown to protect us from making unexpectedly large data tables by accident because MULTIPLICATIVE MATCHES are a common problem in MISSPECIFIED joins. 
+
+=================================================================
+
+Allowing multiplicativa matches - allow.cartesian
+
+This can set allow.cartesian to proceed intentionally. 
+
+
+=================================================================
+
+Missing Values (na) will match all other missing values
+
+If we have missing values in our join column, these can also lead to multiplicative matches, because they will match all other missing values in the join. 
+
+! To remove these mathce, which are likely MEANINGLESS, we can FILTER OUT rows with missing values in the join key columns. 
+
+Keeping only the first match - The Data Table we only want to match the most recent collection. To do this we can set mult = "first" to keep only the first matching row in the main DT. 
+```{r}
+site1[site2, on = .(songs), mult = "first"]
+```
+
+=================================================================
+
+Identifying and removing duplicates
+
+duplicated(): what rows are duplicates?
+
+! The duplicated() function from the data table package wil tell WHICH ROWS ARE DUPLICATES. It returns a vector of TRUE and FALSE, values, where each entry corresponds to a row in the data table.
+
+A value of TRUE means that the rows has the SAME VALUES AS ONE OF THE PREVIOUS ROWS in the data table. 
+
+An additional argument, "by", can be used to restric checks to only a SUBSET of columns, for example looking for duplicates in just the join key(CPF)column.  
+
+
+================================================================
+
+The unique() function
+
+unique(): filter data.table to just unique rows
+
+The unifque fucntion takes the same arguments, but instead returns the data table without the rows that were determined to be duplicates.
+
+================================================================
+
+Joining with missing values
+
+• Using the merge() function, inner join cardio to heart with the appropriate argument to override any errors that you encounter.
+
+```{r}
+# Try an inner join
+merge(heart, cardio, by = "gene", allow.cartesian = TRUE)
+```
+
+• Filter MISSING values
+```{r}
+heart_2 <- heart[!is.na(gene)]
+cardio_2 <- cardio[!is.na(gene)]
+```
+
+• INNER JOIN the filtered data.tables
+```{r}
+merge(heart_2, cardio_2, by = "gene")
+```
+
+Filtering Duplicates
+
+• Use the unique() function to remove duplicate entries in the "gene" column in both heart_2 and cardio_2. Keep only the last row for each gene.
+
+```{r}
+heart_3 <- unique(heart_2, by = "gene", fromLast = TRUE)
+cardio_3 <- unique(cardio_2, by = "gene", fromLast = TRUE)
+```
+
+• Inner join cardio_3 to heart_3 using the merge() function. Append ".heart" and ".cardio" as suffixes to the "change" and "pvalue" columns.
+
+```{r}
+# Inner join
+reproducible <- merge(heart_3, cardio_3, by = "gene", suffixes = c(".heart", ".cardio"))
+reproducible
+```
+
+================================================================
+
+Joining and Filtering Duplicates
+
+• Using the data.table syntax, right join framingham to heart_2, taking the first probe for each gene in heart_2.
+
+```{r}
+# Right join taking the first match
+heart_2[framingham, on = .(gene), mult = "first"]
+```
+
+• Anti-join framingham to reproducible to see whether you found any genes that have not previously been seen to have an association with heart disease.
+
+```{r}
+# Anti-join
+reproducible[!framingham, on = .(gene)]
+```
+
