@@ -1,0 +1,83 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Joining Data With Data.Table in R - Problem Columns
+
+In this lessons we will learn how to diagnose commom problems we may encounter with data table columns when joining. 
+
+When joining two data tables we may someties find that they share column names which are not the koin keys. It make it harder to correctly IDENTIFY the join keys and they make it harder to interpret the result of the join. 
+
+The suffixes argument cand add useful context:
+merge(children, parents, by.x = "parent", by.y = "name, suffixes = c(".child", ".parent"))
+
+=================================================================
+
+Sometimes, data frames store the unique identifying information.
+! We will need to extract these if we want to use them as the join keys or want to keep that information in the result of the join. 
+
+The simples way to do this is to convert it to a DataTable using the function as.table
+
+```{r}
+parents <- as.data.table(parents, keep.rownames = "parent")
+parents
+```
+
+=================================================================
+
+Column name suffixes
+
+The three data.tables containing information about the geography and population of Australia have been loaded into our R session:
+capitals, area, and population. 
+
+Both area and population now have a column named "percentage".
+
+The "percentage" column in area contains the percentage of total land mass each state occupies. 
+
+The "percentage" column in population contains the percentage of the total population living in each city.
+
+• Use the merge() function to inner join population to capitals and save the result to capital_pop.
+
+```{r}
+# Inner join
+capital_pop <- merge(capitals, population, nomatch = 0 )
+
+# Left join
+merge(capital_pop, area, by = "state", all.x = TRUE)
+```
+
+• This time, left join area to capital_pop changing the suffixes of the two "percentage" columns to ".pop" and ".area".
+
+```{r}
+# Inner join from step 1
+capital_pop <- merge(capitals, population, by = "city")
+
+# Left join with suffixes
+merge(capital_pop, area, by = "state", all.x = TRUE, suffixes = c(".pop", ".area"))
+```
+   percentage.pop area_km2 percentage.area
+1:         0.0178     2358          0.0003
+2:         0.2074   800641          0.1041
+3:         0.0060  1349129          0.1754
+4:         0.0974  1730647          0.2250
+5:         0.0550   983482          0.1279
+6:         0.0092    68401          0.0089
+7:         0.1924   227416          0.0296
+8:         0.0856  2529875          0.3289
+
+================================================================
+
+• Convert netflix to a data.table using the as.data.table() function so that its rownames become a column named "series".
+```{r}
+# Convert netflix to a data.table
+netflix_dt <- as.data.table(netflix, keep.rownames = "series")
+
+```
+• Right join the new data.table you've just created,netflix_dt, to imdb using the data.table join syntax.
+```{r}
+# Right join
+imdb[netflix_dt, on = .(title = series)]
+                          #imdb  #netflix_dt
+```
+
