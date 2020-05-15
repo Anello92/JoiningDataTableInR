@@ -1,0 +1,146 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+IMPORTANT 
+
+Joining Data with Data.Table in R - Set operations
+
+In this less, we will learn how to use SET operations to COMPARE and COMBINE the rows of two data tables that have the same columns. 
+
+====================================================================
+
+Set operation functions
+
+Given two data.tables with the same columns:
+
+This group of three functions will enable us to identify rows that are duplicated across two data tables, those unique to either data table, and concatenate two data tables KEEPING ONLY THE UNIQUE ROWS in both. 
+
+fintersect(): what rows do these two data.tables share in common?
+```{r}
+fintersect(datatable1, datable2)
+
+#fintersect() function takes two data tables that have the SAME COLUMNS as its inputs and returns a new sata table containing the set of rows that can be found in BOTH data tables. 
+
+#fintersect() by default only one copy of each row is returned, even if there are multiple copies in each data table. 
+
+fintersect(dataTable1, dataTable2, all = TRUE)
+#fintersect() all = TRUE to keep all pairs of matching duplicates
+```
+
+Two data.tables:
+
+Use funion() to concatenate unique rows
+Three or more:
+
+Concatenate all data.tables using rbind() or rbindlist()
+Identify and remove duplicates using duplicated() and unique()
+
+
+FUNION()
+=================================================================
+```{r}
+#funion(): what is the unique set of rows across these two data.tables?
+
+#funion() extract all rows found in either data.table:
+
+funion(dataTable1, dataTable2)
+
+#funion() takes two data tables that have the SAME COLUMNS as its inputs and returns a NEW DATA TABLE conting the set of ALL UNIQUE ROWS  found in either data table. The result will only contain ONE COPY OF EACH UNIQUE ROW.
+
+funion(dataTable1, dataTable2, all = TRUE) 
+
+#funion() setting all = TRUE will keep ALL COPIES OF EACH ROW
+
+#funion() is a useful way to concatenate two data table while REMOVING DUPLICATE ROWS. 
+
+```
+
+FSETDIFF()
+===================================================================
+```{r}
+#fsetdiff(): what rows are unique to this data.table?
+  #Extract EXCLUSIVELY ROWS in the FIRST data.table
+  
+fsetdiff(dataTable1, dataTable2)
+
+#fsetdiff() takes two data tables that have the same column as its inputs, and returns a new data table containing the set of rows thar are only find in the data table supplied as its first argument.
+
+#fsetdiff() duplicate rows are ignored by default 
+
+fsetdiff(dataTable1, dataTable2, all = TRUE)
+
+#When setting all = TRUE, any copies UNIQUE to the FIRST data table are ALSO RETURNED.
+```
+
+
+FINTERSECT()
+=================================================================
+
+Use the fintersect() function to build a new data.table containing countries located in both Europe and Asia.
+
+```{r}
+# Obtain countries in both Asia and Europe
+fintersect(gdp$asia, gdp$europe)
+```
+
+Concatenate all data.tables in gdp and assign it to gdp_all.
+
+```{r}
+# Concatenate all data tables
+gdp_all <- rbindlist(gdp)
+```
+
+Use the duplicated() function to filter gdp_all to rows that are duplicates to find all countries located in more than one continent.
+
+```{r}
+# Find all countries that span multiple continents
+gdp_all[duplicated(gdp_all)]
+```
+
+REMOVING DUPLICATES WHILE COMBINING TABLES
+==================================================================
+
+Use the funion() function to build a new data.table containing all countries in either Europe or Asia, with each country appearing only once in the result.
+
+```{r}
+# Get all countries in either Asia or Europe
+funion(gdp$asia, gdp$europe)
+```
+
+Concatenate all data.tables in gdp and assign it to gdp_all.
+
+```{r}
+# Concatenate all data tables
+gdp_all <- rbindlist(gdp)
+```
+
+Use the unique() function to remove duplicate rows fromgdp_all so that each country occurs only once in the result.
+
+```{r}
+# Print all unique countries
+unique(gdp_all)
+```
+
+
+
+IDENTIFYING OBSERVATIONS UNIQUE TO A TABLE
+==================================================================
+
+Print a new data.table containing rows from gdp$africa that are not present in middle_east.
+```{r}
+fsetdiff(gdp$africa, middle_east)
+```
+
+Print a new data.table containing rows from gdp$asia that are not present in middle_east.
+```{r}
+fsetdiff(gdp$asia, middle_east)
+```
+
+Print a new data.table containing rows from gdp$europe that are not present in middle_east.
+```{r}
+fsetdiff(gdp$europe, middle_east)
+```
+
