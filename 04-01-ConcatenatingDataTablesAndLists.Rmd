@@ -1,0 +1,158 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Joining Data with Data.Table in R - Concatenating data.tables
+
+In this lesson we will learn how to work with dataset whose rows are spread accros multiple data tables
+by concatenating them into a SINGLE DATA TABLE.
+
+==========================================================================
+
+Same column, different data.tables
+
+Sometimes datasets we want to work with are split across multiple datata tables, usually because they've been read in from multiple files.
+
+We may want to concatenate the rows into a single data table.
+
+==========================================================================
+
+Concatenation functions - concatenate two or more data.tables stored as variables
+
+rbind(): concatenate rows from data.tables stored in different variables
+It takes any number of data tables as inputs, and concatenates their rows
+
+rbindlist(): concatenate row from a list of data.tables()
+
+==========================================================================
+
+Adding an identifier column
+
+The idcol argument adds a column indicating the data.table of origin
+```{r}
+rbind("2015" = sales_2015, "2016" = sales_2016, idcol = "year")
+```
+Each of these variables can be given names using the equals operator, and an
+extra argument "idcol" will tell rbind() to use these names to create an extra column in the result that indicates each row's data table of origin.
+
+If we use the idcol argument WITHOUT naming the variable the data tables will be numbered instead.
+
+If we don't supply a column name to idcol and just set it to true, the column will be named .id
+
+rbind(sales_2015, sales_2016, idcol = TRUE)
+   .id quarter  amount
+1:   1       1 3200100
+2:   1       2 2950000
+3:   1       3 2980700
+4:   1       4 3420000
+5:   2       1 3350000
+6:   2       2 3000300
+7:   2       3 3120200
+8:   2       4 3670000
+
+
+
+When the input data tables eache have DIFFERENT NUMBEER OF COLUMNS, we will need to set the fill argument to TRUE. This will fill the missing columns with NAs in the result. 
+
+=========================================================================
+
+The rbindlist() function
+
+concatenate rows from a list of data.tables. Rather than reading each file into separate variable, we could load these into a list by lapply() over a vector of file names, and then use the rbindlist() function to concatenate their rows into a single data table. 
+```{r}
+table_files <- c("sales_2015.csv","sales_2016.csv")
+list_of_tables <- lapply( table_files, fread)
+```
+
+=========================================================================
+
+Adding and identifier column
+
+the idcol argument takes names fom the input list
+
+names(list_of_tables) <- ("2015","2016")
+rbindlist(list_of_tables, idcol = "year")
+
+   year quarter  amount
+1: 2015       1 3200100
+2: 2015       2 2950000
+3: 2015       3 2980700
+4: 2015       4 3420000
+5: 2016       1 3350000
+6: 2016       2 3000300
+7: 2016       3 3120200
+8: 2016       4 3670000
+
+=========================================================================
+Handling different column orders
+
+Finally, the .names arguments both rbind() and rbinlist()functions matches columns by their names when concatenating data tables.
+
+```{r}
+rbind("2015" = sales_2015, "2016" = sales_2016, idcol = "year", use.names = TRUE)
+```
+
+Setting .names to FALSE allows to concatenate data tables whos columns have different names.
+
+```{r}
+rbind("2015" = sales_2015, "2016" = sales_2016, idcol = "year", 
+      use.names = FALSE)
+```
+
+=========================================================================
+Differing defaults
+
+Default for rbind() is use.names = TRUE
+Default for rbindlist() is use.names = FALSE unless fill = TRUE.
+
+====================================================================
+
+oncatenate case numbers from weeks 50 and 51
+rbind(ebola_W50, ebola_W51)
+
+====================================================================
+
+Fix your call to rbind() so that the three data.tables are successfully concatenated.
+
+```{r}
+# Modify the code
+rbind(ebola_W50, ebola_W51, ebola_W52, fill = TRUE)
+```
+
+===================================================================
+
+Concatenating a list of data.tables
+
+The rbindlist() function can be used to concatenate data.tables stored in a list.
+
+```{r}
+# Concatenate its data.tables
+gdp_all_1 <- rbindlist(gdp)
+```
+
+===================================================================
+
+Modify the code so that a new column, "continent" is created in the result stored in gdp_all_2.
+
+```{r}
+# Concatenate its data.tables
+gdp_all_2 <- rbindlist(gdp, idcol = "continent")
+```
+
+===================================================================
+
+Modify your call to rbindlist() to fix any problems you have found, saving the result in gdp_all_3.
+
+```{r}
+# Run this code to inspect gdp_all_2
+gdp_all_2 <- rbindlist(gdp, idcol = "continent")
+str(gdp_all_2)
+gdp_all_2[95:105]
+
+# Fix the problem
+gdp_all_3 <- rbindlist(gdp, idcol = "continent", fill = TRUE)
+gdp_all_3
+```
+
+
