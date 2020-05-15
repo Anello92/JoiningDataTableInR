@@ -1,0 +1,71 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Joining Data with Data.Table in R - Casting data.tables
+
+In this lesson, we will learn hot to cast data tables from LONG TO WIDE formats. 
+
+====================================================================
+
+Long data.table
+
+```{r}
+sales_wide <- dcast(sales_long, quarter ~ year, value.var = "amount")
+```
+
+dcast() function allows to make the reverse transformation, reshaping a long format data table into a wide one. 
+
+dcast() takes 3 arguments
+  1. data.table to reshape
+  2. rows to keep behind as identifiers
+  3. group labels to split by
+
+====================================================================
+
+  Use dcast() to build a wide data.table containing the population of each country, with each country as a row and each year as a column.
+
+```{r}
+# Split the population column by year
+dcast(gdp_oceania, formula = country ~ year, value.var = "population")
+```
+
+Create another wide format data.table containing the GDP of each country with each year as a row and each country as a column.
+
+```{r}
+# Split the gdp column by country
+dcast(gdp_oceania, formula = year ~ country, value.var = "gdp")
+```
+
+Convert gdp_oceania to wide format with each country as a row, and splitting both the "gdp" and "population" columns into columns for each "year".
+
+```{r}
+# Split the gdp and population columns by year
+dcast(gdp_oceania, formula = country ~ year, value.var = c("gdp", "population"))
+```
+
+Convert wide to a matrix using the "country" column as the matrix rownames.
+
+```{r}
+# Reshape from wide to long format
+wide <- dcast(gdp_oceania, formula = country ~ year, value.var = c("gdp", "population"))
+
+# convert to a matrix
+as.matrix(wide, rownames = "country")
+```
+
+Modify the call to dcast() so that the "continent" column is also kept aside as row identifiers.
+
+```{r}
+# Modify your previous code
+dcast(gdp_oceania, formula = country + continent ~ year, value.var = c("gdp", "population"))
+```
+
+Convert gdp_by_industry_oceania to a wide format with each country as a row, splitting the "gdp" column so that the result has columns containing the gdp for each industry and each year.
+
+
+```{r}
+# Split gdp by industry and year
+dcast(gdp_by_industry_oceania, country ~ industry + year, value.var = "gdp")
+```
