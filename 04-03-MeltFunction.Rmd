@@ -1,0 +1,87 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Joining Data with Data.Table in R - Melting Data.Tables
+
+In this lesson, we will learn hot to melt data tables from wIDE TO LONG formats.
+
+
+
+MELT() FUNCTION
+====================================================================
+
+melt() to reshape a WIDE DATA TABLE to a LONG data table. COLUNA P/ LINHAS.
+
+```{r}
+melt(sales_wide, measure.vars = c("2015","2016"))
+```
+   quarter variable value
+1:       1     2015 3200100
+2:       2     2015 2950000
+3:       3     2015 2980700
+4:       4     2015 3420000
+5:       1     2016 3350000
+6:       2     2016 3000300
+7:       3     2016 3120200
+8:       4     2016 3670000
+
+melt() will take these columsn and stack them on top of each other to new columns: "variable" and "value".
+
+```{r}
+melt(sales_wide, id.vars = "quarter", 
+     variable.name = "year", value.name = "amount")
+```
+
+   quarter year  amount
+1:       1 2015 3200100
+2:       2 2015 2950000
+3:       3 2015 2980700
+4:       4 2015 3420000
+5:       1 2016 3350000
+6:       2 2016 3000300
+7:       3 2016 3120200
+8:       4 2016 3670000
+
+=====================================================================
+
+Melting a wide table
+
+Use the melt() function to create a long format data.table stacking the values for each country's column.
+
+```{r}
+# Reshape gdp_per_capita to the long format
+melt(gdp_per_capita, id.vars = "year")
+```
+
+Within your call to melt(), name the new "variable" column as "country" and the new "value" column as "gdp_pc".
+
+```{r}
+# Rename the new columns
+melt(gdp_per_capita, id.vars = "year", 
+     variable.name ="country", value.name = "gdp_pc")
+```
+
+Use the measure.vars argument to stack the columns "Week_50" and "Week_51". The new column containing its values should be called "cases", and the new column of variable labels should be called "period".
+
+```{r}
+# Stack Week_50 and Week_51
+melt(ebola_wide, measure.vars = c("Week_50", "Week_51"), 
+     variable.name = "period", value.name = "cases")
+```
+
+Modify the call to melt() to also ask to keep only the "Location" column as row identifiers, dropping the "period_start" and "period_end" columns from the result.
+
+```{r}
+# Modify the code
+melt(ebola_wide, measure.vars = c("Week_50", "Week_51"), 
+     variable.name = "period", value.name = "cases", 
+     id.vars = "Location")
+```
+     Location  period cases
+ 1:       BEYLA Week_50    NA
+ 2:     CONAKRY Week_50    37
+ 3:     CONAKRY Week_50    NA
+ 4:       COYAH Week_50    31
+ 5:       COYAH Week_50    NA....
